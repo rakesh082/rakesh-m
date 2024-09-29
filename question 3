@@ -1,0 +1,42 @@
+# views.py
+
+
+from django.db import transaction
+from django.http import HttpResponse
+from .models import MyModel
+from .signals import my_signal
+def my_signal_handler(sender, **kwargs):
+    print("Signal handler running...")
+    MyModel.objects.create(name="Signal Handler Entry")
+    print("Signal handler completed.")
+
+my_signal.connect(my_signal_handler)
+
+def my_view(request):
+    try:
+        with transaction.atomic():
+            print("Transaction started...")
+
+            MyModel.objects.create(name="Caller Entry")
+
+            print("Sending signal...")
+            my_signal.send(sender=None)
+
+            raise Exception("Forcing a rollback!")
+    
+    except Exception as e:
+        print("Exception occurred, transaction rolled back:", str(e))
+
+    return HttpResponse("Signal and transaction test completed.")
+
+# models.py
+from django.db import models
+
+class MyModel(models.Model):
+    name = models.CharField(max_length=100)
+
+
+# signals.py
+from django.dispatch import Signal
+my_signal = Signal()
+
