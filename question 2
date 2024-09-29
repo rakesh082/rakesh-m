@@ -1,0 +1,30 @@
+the answer for question number is here
+
+#Django signals run in the same thread as the caller by default
+
+
+#save this as signal.py 
+#--------------------------------
+from django.dispatch import Signal
+mysignal = Signal()
+
+#---------------------------------
+
+# views.py
+
+
+import threading
+from datetime import datetime
+from django.http import HttpResponse
+from .signal import mysignal
+
+def signalhandlr(sender, **kwargs):
+    print(f"Signal handler thread ID: {threading.get_ident()}")
+    print(f"Signal received at: {datetime.now()}")
+my_signal.connect(my_signal_handler)
+def my_view(request):
+    print(f"Caller thread ID: {threading.get_ident()}")
+    print(f"Sending signal at: {datetime.now()}")
+    my_signal.send(sender=None)
+    print(f"Signal sent at: {datetime.now()}")
+    return HttpResponse("Signal has been sent.")
