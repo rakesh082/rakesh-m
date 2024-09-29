@@ -1,5 +1,10 @@
 Django signals are executed synchronously
 
+signal.py
+
+from django.dispatch import Signal
+mysignal = Signal()
+
 handle.py
 
 import time #for time
